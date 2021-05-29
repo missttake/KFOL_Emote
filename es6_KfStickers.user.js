@@ -24,10 +24,10 @@
 //eddie32大佬的KFOL助手的表情插件的分支，目前基于5.1.3版本的喵拉分支 @copyright   2014-2019, eddie32 https://greasyfork.org/users/5415 https://github.com/liu599/KF-Emotion-UserScript
 /*
 本次更新日志：
-0.4.2 删改自定义贴纸代码重构，删除指定自定义贴纸功能由[改]按钮移到[删]按钮。
+0.4.2 增加删改指定自定义贴纸功能。相比Dev分支，删改自定义贴纸代码重构，删除指定自定义贴纸功能由[改]按钮移到[删]按钮。
 历史更新记录：
-0.4.0 增加替换指定自定义贴纸功能
-0.3.9 增加删除指定自定义贴纸功能
+0.4.0 增加替换指定自定义贴纸功能，与删除指定自定义贴纸功能同按钮，此按钮名改为[改]（Dev分支）
+0.3.9 增加删除指定自定义贴纸功能，改变按钮名称（Dev分支）
 0.3.8 自定义贴纸导入功能正则规则优化
 0.3.7 小企鹅追加
 0.3.6 修改颜文字分组为绘文字+颜文字分组（增加绘文字，微调颜文字顺序）；增加图文分组（目前就一个，后续增加贴纸为热更新，计划更新的贴纸使用透明1px图片代替，后续服务端更新即可，无需更新脚本）
@@ -400,13 +400,21 @@ const createContainer = function (textArea) {
             //任意无协议前缀的图片url，默认增加https协议前缀
             else if (/[a-zA-Z0-9\-\.]+\.+[a-zA-Z]+\/.*.(png|jpg|jpeg|gif|webp|bmp|tif)$/i.test(userimgcmt[mt])) {addList.push('https://'+userimgcmt[mt]);}
             //由sticker.inari.site托管的用户贴纸组
-            else if (/[A-Za-z0-9\_\/]+\/+[0-9\/]+.(png|jpg|jpeg|gif|webp)$/i.test(userimgcmt[mt])) {addList.push('https://sticker.inari.site/usr/'+userimgcmt[mt]);}}
+            else if (/[A-Za-z0-9\_\/]+\/+[0-9\/]+.(png|jpg|jpeg|gif|webp)$/i.test(userimgcmt[mt])) {addList.push('https://sticker.inari.site/usr/'+userimgcmt[mt]);}
+        }
+          
+        if (addList.length < userimgaddrmt.length){
+            alert('含有非法输入，请检查是否由图片url错误');
+        }
+          
         if (addList.length > 0) {let userSmileList = [];
             if (localStorage.userimgst) {
                 try {userSmileList = JSON.parse(localStorage.userimgst);}
                 catch (ex) {console.log(ex);userSmileList = [];}}
             userSmileList = [...userSmileList, ...addList];
-            localStorage.setItem('userimgst', JSON.stringify(userSmileList));}
+            localStorage.setItem('userimgst', JSON.stringify(userSmileList));
+            alert('贴纸已添加，请刷新');
+        }
     }).on('click', '.kfe-user-r', function (e) {
         e.preventDefault();
         if (UserSmileList !="https://sticker.inari.site/null.jpg"){
@@ -432,11 +440,14 @@ const createContainer = function (textArea) {
                 let usreplace = prompt("请输入用于替换的图片url", "https://sticker.inari.site/inari.png");
                     let j = userimgu;
                     if (/(http:\/\/|https:\/\/).*.(png|jpg|jpeg|gif|webp|bmp|tif)$/i.test(usreplace)) {
+                       if (confirm('确定替换序号为'+userimgu+'的贴纸吗？这是最后一次确认！')) {
                         UserSmileList[j - 1] = usreplace;
                         localStorage.setItem('userimgst', JSON.stringify(UserSmileList));
                         alert('已替换指定序号的贴纸，请刷新');
+                       }
                     }
                     else if (usreplace == null) { }
+                    else if (usreplace == 0) {alert('非法输入，请检查！');}
                     else {
                         alert('非法输入，请检查！');
                     }
@@ -451,7 +462,10 @@ const createContainer = function (textArea) {
         e.preventDefault();
         if (confirm('确定删除自定义表情贴纸吗？')) {
           if (confirm('按确定删除全部贴纸，按取消删除指定贴纸。')) {
-              if (confirm('确定删除全部自定义贴纸吗？')) {localStorage.removeItem('userimgst');}
+              if (confirm('确定删除全部自定义贴纸吗？这是最后一次确认')) {
+                    localStorage.removeItem('userimgst');
+                    alert('已删除全部自定义贴纸，请刷新');
+              }
           }
           else {
               let userimgd = prompt("请输入要删除的贴纸的序号", "1");
@@ -465,12 +479,14 @@ const createContainer = function (textArea) {
                  alert('非法输入，请检查！');
                }
                else if (userimgd <= UserSmileList.length) {
+                 if (confirm('确定删除序号为'+userimgd+'的贴纸吗？这是最后一次确认！')) {
                    for (let i = userimgd; i <= UserSmileList.length; i++) {
                         UserSmileList[i - 1] = UserSmileList[i];
                     }
                     UserSmileList.pop();
                    localStorage.setItem('userimgst', JSON.stringify(UserSmileList));
                    alert('已删除指定序号的贴纸，请刷新');
+                 }
                 }
                 else {
                         alert('非法输入，请检查！');

@@ -18,6 +18,7 @@
 // @copyright   2014-2019, eddie32 ; 2020-2021, Hazukikaguya
 // @grant       none
 // @license     MIT
+// @require     https://code.jquery.com/jquery-1.11.1.min.js
 // @run-at      document-end
 // @updateURL   https://github.com/HazukiKaguya/KFOL_Stickers/raw/master/es6_KfStickers.user.js
 // ==/UserScript==
@@ -363,6 +364,7 @@ const createContainer = function (textArea) {
     <input type="button" class="kfe-user-r" value="查">
     <input type="button" class="kfe-user-u" value="改">
     <input type="button" class="kfe-user-d" value="删">
+    <input type="button" class="kfe-user-t" value="云">
   </div>
 </div>
 `).insertBefore($(textArea));
@@ -402,11 +404,9 @@ const createContainer = function (textArea) {
             //由sticker.inari.site托管的用户贴纸组
             else if (/[A-Za-z0-9\_\/]+\/+[0-9\/]+.(png|jpg|jpeg|gif|webp)$/i.test(userimgcmt[mt])) {addList.push('https://sticker.inari.site/usr/'+userimgcmt[mt]);}
         }
-          
-        if (addList.length < userimgaddrmt.length){
-            alert('含有非法输入，请检查是否由图片url错误');
+        if (addList.length < userimgcmt.length){
+            alert('含有非法输入，请检查是否有图片url错误');
         }
-          
         if (addList.length > 0) {let userSmileList = [];
             if (localStorage.userimgst) {
                 try {userSmileList = JSON.parse(localStorage.userimgst);}
@@ -424,39 +424,39 @@ const createContainer = function (textArea) {
            alert("自定义表情贴纸为空！");
         }
     }).on('click', '.kfe-user-u', function (e) {
-        e.preventDefault();
-        if (confirm('确定要替换指定自定义表情贴纸吗？')) {
-        let userimgu = prompt("请输入要替换的贴纸的序号", "1");
-            if (/[0-9]$/i.test(userimgu)) {
-             let userimgst = localStorage.userimgst;
-             let UserSmileList = JSON.parse(userimgst);
-              if (userimgu > UserSmileList.length) {
+         e.preventDefault();
+         let userimgu = prompt("请输入要替换的贴纸的序号", "1");
+         if (/[0-9]$/i.test(userimgu)) {
+            let userimgst = localStorage.userimgst;
+            let UserSmileList = JSON.parse(userimgst);
+            if (userimgu > UserSmileList.length) {
                 alert('序号超出贴纸数，请检查');
               }
-              else if (userimgu == 0) {
+            else if (userimgu == 0) {
                  alert('非法输入，请检查！');
               }
-              else if (userimgu <= UserSmileList.length) {
+            else if (userimgu <= UserSmileList.length) {
                 let usreplace = prompt("请输入用于替换的图片url", "https://sticker.inari.site/inari.png");
-                    let j = userimgu;
+                let j = userimgu;
                     if (/(http:\/\/|https:\/\/).*.(png|jpg|jpeg|gif|webp|bmp|tif)$/i.test(usreplace)) {
                        if (confirm('确定替换序号为'+userimgu+'的贴纸吗？这是最后一次确认！')) {
-                        UserSmileList[j - 1] = usreplace;
-                        localStorage.setItem('userimgst', JSON.stringify(UserSmileList));
-                        alert('已替换指定序号的贴纸，请刷新');
+                          UserSmileList[j - 1] = usreplace;
+                          localStorage.setItem('userimgst', JSON.stringify(UserSmileList));
+                          alert('已替换指定序号的贴纸，请刷新');
                        }
                     }
-                    else if (usreplace == null) { }
-                    else if (usreplace == 0) {alert('非法输入，请检查！');}
-                    else {
-                        alert('非法输入，请检查！');
-                    }
-             }
+            else if (usreplace == null) { }
+            else if (usreplace == 0) {
+                  alert('非法输入，请检查！');
             }
-            else if (userimgu == null) { }
             else {
-                alert('非法输入，请检查！');
+                  alert('非法输入，请检查！');
             }
+         }
+         else if (userimgu == null) { }
+         else {
+              alert('非法输入，请检查！');
+         }
         }
     }).on('click', '.kfe-user-d', function (e) {
         e.preventDefault();
@@ -498,6 +498,21 @@ const createContainer = function (textArea) {
              }
           }
         }
+    }).on('click', '.kfe-user-t', function (e) {
+        if (confirm('[确定]进行云端同步到本地，[取消]进行本地同步到云端')) {
+          $(document).ready(function(){
+               let username = prompt("用户名",'username');
+               if (username!=null){
+                let password = prompt("密码",'password');
+               $.get('https://sticker.inari.site/api/'+'username='+username+',password='+password+'.txt',function(data,status){
+                   alert("状态：" + status);
+                   prompt("数据：",data);
+               });}
+              else {}
+            });
+            return;
+        }
+        alert("本地同步到云端");
     }).find('.kfe-close-panel').click(function () {
         $container.find('.kfe-smile-panel').hide();
     });
